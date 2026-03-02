@@ -151,22 +151,26 @@ export default function App() {
   const [q1Text, setQ1Text] = useState("");
   const [showQ1Text, setShowQ1Text] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
-  const saveResponseToDatabase = async () => {
+  const saveResponseToDatabase = async (
+  question1: "yes" | "no" | null,
+  question2: 1 | 2 | 3 | null,
+  happinessValue: number
+) => {
   const { error } = await supabase
     .from("Responses")
     .insert([
       {
-        question_1: q1Response,
-        question_2: q2Response?.toString(),
-        happiness_score: state.happiness,
-        completed: true
-      }
+        question_1: question1,
+        question_2: question2,
+        happiness_score: happinessValue,
+        completed: true,
+      },
     ]);
 
   if (error) {
     console.error("Error saving response:", error);
   } else {
-    console.log("Response saved successfully");
+    console.log("Saved correctly");
   }
 };
 
@@ -215,7 +219,7 @@ export default function App() {
     setState((s) => ({ ...s, happiness: 100, bgTheme: "warm" }));
     fireConfetti();
     setTimeout(() => {
-      saveResponseToDatabase();
+      saveResponseToDatabase("yes",null,100);
       setState((s) => ({
         ...s,
         screen: "final",
@@ -251,7 +255,7 @@ export default function App() {
         isCelebrationBig: false,
       }));
       fireConfetti();
-      saveResponseToDatabase();
+      saveResponseToDatabase("no",1,100);
     } else if (option === 2) {
       setState((s) => ({
         ...s,
@@ -261,7 +265,7 @@ export default function App() {
         finalMessage: "Fine. Monday it is. I'm setting a reminder. 📅",
         isCelebrationBig: false,
       }));
-       saveResponseToDatabase();
+       saveResponseToDatabase("no",2,55);
     } else {
       setState((s) => ({
         ...s,
@@ -272,7 +276,7 @@ export default function App() {
         isCelebrationBig: true,
       }));
       setTimeout(() => fireConfetti(true), 300);
-       saveResponseToDatabase();
+       saveResponseToDatabase("no",3,100);
     }
   };
 
