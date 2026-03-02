@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import confetti from "canvas-confetti";
 import { supabase } from "../supabase"
@@ -138,7 +138,6 @@ const FloatingEmoji = ({ emoji, delay }: { emoji: string; delay: number }) => (
 );
 
 export default function App() {
-  const [sessionId, setSessionId] = useState<string | null>(null)
   const [state, setState] = useState<AppState>({
     screen: "landing",
     happiness: 50,
@@ -148,9 +147,28 @@ export default function App() {
   });
 
   const [q1Response, setQ1Response] = useState<"yes" | "no" | null>(null);
+  const [q2Response, setQ2Response] = useState<1 | 2 | 3 | null>(null);
   const [q1Text, setQ1Text] = useState("");
   const [showQ1Text, setShowQ1Text] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
+  const saveResponseToDatabase = async () => {
+  const { error } = await supabase
+    .from("Responses")
+    .insert([
+      {
+        question_1: q1Response,
+        question_2: q2Response?.toString(),
+        happiness_score: state.happiness,
+        completed: true
+      }
+    ]);
+
+  if (error) {
+    console.error("Error saving response:", error);
+  } else {
+    console.log("Response saved successfully");
+  }
+};
 
   const fireConfetti = useCallback(
     (big = false) => {
@@ -197,6 +215,7 @@ export default function App() {
     setState((s) => ({ ...s, happiness: 100, bgTheme: "warm" }));
     fireConfetti();
     setTimeout(() => {
+      saveResponseToDatabase();
       setState((s) => ({
         ...s,
         screen: "final",
@@ -221,6 +240,7 @@ export default function App() {
   };
 
   const handleQ2Option = (option: 1 | 2 | 3) => {
+    setQ2Response(option);
     if (option === 1) {
       setState((s) => ({
         ...s,
@@ -231,6 +251,7 @@ export default function App() {
         isCelebrationBig: false,
       }));
       fireConfetti();
+      saveResponseToDatabase();
     } else if (option === 2) {
       setState((s) => ({
         ...s,
@@ -240,6 +261,7 @@ export default function App() {
         finalMessage: "Fine. Monday it is. I'm setting a reminder. 📅",
         isCelebrationBig: false,
       }));
+       saveResponseToDatabase();
     } else {
       setState((s) => ({
         ...s,
@@ -250,6 +272,7 @@ export default function App() {
         isCelebrationBig: true,
       }));
       setTimeout(() => fireConfetti(true), 300);
+       saveResponseToDatabase();
     }
   };
 
