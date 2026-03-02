@@ -151,30 +151,6 @@ export default function App() {
   const [q1Text, setQ1Text] = useState("");
   const [showQ1Text, setShowQ1Text] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
-  useEffect(() => {
-  const createSession = async () => {
-    const { data, error } = await supabase
-      .from('Responses')
-      .insert([
-        {
-          q1: null,
-          q1Text: null
-        }
-      ])
-      .select()
-
-    if (data && data.length > 0) {
-      setSessionId(data[0].id)
-      console.log("Session created:", data[0].id)
-    }
-
-    if (error) {
-      console.error("Error creating session:", error)
-    }
-  }
-
-  createSession()
-}, [])
 
   const fireConfetti = useCallback(
     (big = false) => {
